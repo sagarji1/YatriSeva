@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet.heat";
+
+// Configure default Leaflet icon
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Configure default Leaflet icon
 let DefaultIcon = L.icon({
   iconUrl: icon,
   shadowUrl: iconShadow,
@@ -20,9 +22,31 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 const API_URL = "http://localhost:5000";
 
+// 🔥 Heatmap Layer Component
+function HeatmapLayer({ tourists }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!tourists || tourists.length === 0) return;
+
+    // Prepare points for heatmap: [lat, lng, intensity]
+    const heatPoints = tourists
+      .filter((t) => t.currentLocation)
+      .map((t) => [t.currentLocation.lat, t.currentLocation.lng, 0.5]);
+
+    const heatLayer = L.heatLayer(heatPoints, { radius: 25 }).addTo(map);
+
+    return () => {
+      map.removeLayer(heatLayer); // cleanup
+    };
+  }, [tourists, map]);
+
+  return null;
+}
+
 export default function Dashboard() {
   const [tourists, setTourists] = useState([]);
-  const [mapCenter, setMapCenter] = useState([28.7041, 77.1025]);
+  const [mapCenter] = useState([28.7041, 77.1025]);
   const [loading, setLoading] = useState(true);
 
   const fetchTourists = async () => {
@@ -38,7 +62,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchTourists();
-    const interval = setInterval(fetchTourists, 10000);
+    const interval = setInterval(fetchTourists, 10000); // refresh every 10s
     return () => clearInterval(interval);
   }, []);
 
@@ -55,10 +79,9 @@ export default function Dashboard() {
           zoom={13}
           style={{ height: "500px", width: "100%", borderRadius: "12px" }}
         >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          />
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+          {/* Tourist Markers */}
           {tourists.map((t) =>
             t.currentLocation ? (
               <Marker
@@ -68,14 +91,14 @@ export default function Dashboard() {
                 <Popup>
                   <strong>{t.name}</strong>
                   <br />
-                  ID: {t.blockchainId}
-                  <br />
-                  Lat: {t.currentLocation.lat.toFixed(5)}, Lng:{" "}
-                  {t.currentLocation.lng.toFixed(5)}
+                  {t.blockchainId}
                 </Popup>
               </Marker>
             ) : null
           )}
+
+          {/* Heatmap Layer */}
+          <HeatmapLayer tourists={tourists} />
         </MapContainer>
       </div>
 
@@ -160,4 +183,3 @@ tableStyle.thtd = {
   borderBottom: "1px solid #ddd",
   textAlign: "left",
 };
-

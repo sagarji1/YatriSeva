@@ -7,17 +7,21 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "repository": {
-  },
+  "repository": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@turf/turf": "^7.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "ethers": "^6.15.0",
     "express": "^5.1.0",
     "mongoose": "^8.18.1",
-    "nodemon": "^3.1.10"
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.6",
+    "nodemon": "^3.1.10",
+    "pdfkit": "^0.17.2",
+    "socket.io": "^4.8.1"
   }
 }

@@ -6,6 +6,8 @@ const allTouristRoute=require("./routes/allTouristRoute")
 const locationRoute=require("./routes/locationRoute")
 const panicRoute=require("./routes/panicRoute")
 const registerRoute=require("./routes/registerRoute")
+const geofence=require("./routes/geofence")
+const fir=require("./routes/fir")
 
 const app = express();
 app.use(express.json());
@@ -16,6 +18,8 @@ mongoose.connect(process.env.MONGO_URL)
   .catch(err => console.log(err));
 
   app.use("/",registerRoute)
+  app.use("/",fir)
+  app.use("/",geofence)
   app.use("/",locationRoute)
   app.use("/",panicRoute)
   app.use("/",allTouristRoute)
